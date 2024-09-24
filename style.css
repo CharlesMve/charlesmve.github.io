@@ -337,6 +337,12 @@ body{
         text-align: center;
     }
 
+    .project-content {
+        max-width: fit-content;
+    
+    
+    }
+
     .pdf {
         display: none;
     }
