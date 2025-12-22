@@ -240,7 +240,7 @@
         .next-btn { right: -20px; }
 
         /* --- RESUME --- */
-        .resume-container { text-align: center; max-width: 600px; margin: 0 auto; }
+        .resume-container { text-align: center; max-width: 900px; margin: 0 auto; }
         .download-btn {
             display: inline-flex; align-items: center; gap: 10px;
             background: var(--accent-color); color: var(--header-bg);
@@ -248,6 +248,31 @@
             margin-top: 30px; font-family: var(--header-font);
         }
         .download-btn:hover { background: var(--hover-color); transform: scale(1.05); }
+
+        /* --- RESUME PREVIEW STYLE (NEW) --- */
+        .resume-preview-container {
+            margin: 30px auto;
+            width: 100%;
+            max-width: 800px; /* Limits width so it doesn't span entire screen */
+            height: 1000px; /* Forces vertical paper aspect ratio on desktop */
+            position: relative;
+        }
+
+        .resume-preview-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 20px;
+            /* Match the project shadow style */
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s ease;
+            background: white; /* Ensure it looks like paper even if loading */
+        }
+
+        .resume-preview-container:hover iframe {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+        }
 
         /* --- RESPONSIVE --- */
         @media (max-width: 900px) {
@@ -267,6 +292,9 @@
             .navbar a { margin: 0; padding: 15px; width: 100%; text-align: center; }
             .menu-icon { display: block; }
             h1 { font-size: 36px; } h2 { font-size: 28px; }
+            
+            /* Resume height adjustment for mobile */
+            .resume-preview-container { height: 600px; }
         }
     </style>
 </head>
@@ -435,7 +463,11 @@
             <p>Ready for download in PDF format.</p>
             <div class="line"></div>
             
-            <a href="https://drive.usercontent.google.com/u/0/uc?id=1N5yrFKzscgTgLUaxivoTXGiBLWCIpQC1&export=download" class="download-btn" target="_blank">
+            <div class="resume-preview-container">
+                <iframe src="https://drive.google.com/file/d/1BmgmqfN7jXwySkb2CikmC4-hFefv_zrJ/preview" allow="autoplay"></iframe>
+            </div>
+
+            <a href="https://drive.usercontent.google.com/u/0/uc?id=1BmgmqfN7jXwySkb2CikmC4-hFefv_zrJ&export=download" class="download-btn" target="_blank">
                 <i class='bx bxs-download'></i> Download Resume
             </a>
         </div>
