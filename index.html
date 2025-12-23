@@ -255,7 +255,10 @@
         #gameContainer {
             position: relative;
             box-shadow: 0 0 50px rgba(0, 255, 255, 0.1);
-            max-width: 95vw; 
+            width: 95vw;
+            max-width: 800px; 
+            display: flex;
+            justify-content: center;
         }
 
         canvas#gameCanvas {
@@ -268,7 +271,7 @@
             height: auto;
             max-width: 800px;
             max-height: 80vh;
-            cursor: auto; /* Cursor visible */
+            touch-action: none; /* Prevents scrolling while playing on phone */
         }
 
         .score-board {
@@ -441,8 +444,10 @@
         .resume-preview-container {
             margin: 30px auto;
             width: 100%;
-            max-width: 800px; 
-            height: 1000px; 
+            max-width: 800px;
+            /* Aspect Ratio Fix for Mobile */
+            aspect-ratio: 8.5 / 11; 
+            height: auto;
             position: relative;
         }
 
@@ -470,18 +475,19 @@
         }
         
         .footer-trigger {
-            font-family: 'Orbitron', sans-serif;
+            font-family: var(--body-font);
             font-size: 14px;
             color: var(--text-color);
             cursor: pointer;
             transition: 0.3s;
             letter-spacing: 1px;
+            font-weight: 700;
         }
 
         .footer-trigger:hover {
             opacity: 1;
             color: #fff;
-            text-shadow: 0 0 8px var(--accent-color), 0 0 15px var(--hover-color);
+            text-shadow: 0 0 10px var(--accent-color), 0 0 20px var(--hover-color), 0 0 40px var(--hover-color);
         }
 
         /* --- RESPONSIVE --- */
@@ -502,7 +508,6 @@
             .navbar a { margin: 0; padding: 15px; width: 100%; text-align: center; }
             .menu-icon { display: block; }
             h1 { font-size: 36px; } h2 { font-size: 28px; }
-            .resume-preview-container { height: 480px; }
             
             /* Responsive Scoreboard for Pong */
             .score-board { font-size: 2rem; }
@@ -518,8 +523,8 @@
                 <span id="playerScore" class="score">0</span>
                 <span id="cpuScore" class="score">0</span>
             </div>
-            <canvas id="gameCanvas" width="800" height="600"></canvas>
-            <div class="controls-hint">PLAY WITH W/S OR UP/DOWN KEYS</div>
+            <canvas id="gameCanvas"></canvas>
+            <div class="controls-hint">DRAG TO MOVE / ARROW KEYS</div>
         </div>
     </div>
 
@@ -750,10 +755,16 @@
     </section>
 
     <footer class="footer">
-        <span class="footer-trigger" onclick="openPongGame()">v2.1.1</span>
+        <span class="footer-trigger" onclick="openPongGame()">v2.1.3</span>
     </footer>
 
     <script>
+        // --- THIS IS THE SPEED VARIABLE ---
+        // Change this number to make the game faster or slower.
+        // 4 is normal/slow. 8 is fast.
+        let baseSpeed = 4;
+        // ----------------------------------
+
         // --- 1. MENU & ANIMATIONS ---
         let menuIcon = document.querySelector('#menu-icon');
         let navbar = document.querySelector('.navbar');
@@ -771,15 +782,17 @@
         window.addEventListener('scroll', function() {
             const logo = document.getElementById('dynamic-logo');
             const aboutSection = document.getElementById('about');
-            const triggerPoint = aboutSection.offsetTop - 150; 
-
-            if (window.scrollY >= triggerPoint) {
-                logo.classList.add('scrolled');
-            } else {
-                logo.classList.remove('scrolled');
+            if(aboutSection) {
+                const triggerPoint = aboutSection.offsetTop - 150; 
+                if (window.scrollY >= triggerPoint) {
+                    logo.classList.add('scrolled');
+                } else {
+                    logo.classList.remove('scrolled');
+                }
             }
         });
 
+        // --- CAROUSEL LOGIC ---
         function moveSlide(carouselId, direction) {
             const container = document.getElementById(carouselId);
             const slides = container.getElementsByClassName('carousel-slide');
@@ -800,6 +813,7 @@
             slides[newIndex].classList.add('active');
         }
 
+        // --- THEME LOGIC ---
         function toggleThemeMenu() {
             const wrapper = document.getElementById('theme-wrapper');
             if (wrapper.classList.contains('active')) {
@@ -825,49 +839,79 @@
             }
         }
 
-        // --- 5. PONG GAME LOGIC (UPDATED) ---
+        // --- 5. SMOOTH PONG GAME LOGIC (PC & MOBILE FIXED) ---
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-        const PADDLE_WIDTH = 10;
-        const PADDLE_HEIGHT = 100;
-        const BALL_RADIUS = 8;
-        const WINNING_SCORE = 5;
         
-        // Slower Speeds for better control
-        let playerY = 250, cpuY = 250;
-        let ballX = 400, ballY = 300;
-        let ballSpeedX = 5, ballSpeedY = 2; 
-        let playerScore = 0, cpuScore = 0;
+        // Game Constants
+        let WINNING_SCORE = 5;
+        let PADDLE_HEIGHT = 100;
+        let PADDLE_WIDTH = 10;
+        let BALL_RADIUS = 8;
+        
+        // Game State
+        let playerY = 250;
+        let cpuY = 250;
+        let ballX = 400;
+        let ballY = 300;
+        let ballSpeedX = 0;
+        let ballSpeedY = 0;
+        let playerScore = 0;
+        let cpuScore = 0;
         let showingWinScreen = false;
-        let gameInterval = null;
-        let paddleSpeed = 7; // Speed of player movement
+        let isGameRunning = false;
+        let animationFrameId;
 
-        // Key states for smooth movement
-        let keys = {
-            w: false,
-            s: false,
-            up: false,
-            down: false
-        };
+        // Input State
+        let keys = { w: false, s: false, up: false, down: false };
+
+        // Resize Canvas for Retina/Mobile clarity
+        function resizeCanvas() {
+            let displayWidth = canvas.clientWidth;
+            // Limit height to maintain aspect roughly or fit screen
+            let displayHeight = Math.min(600, window.innerHeight * 0.6); 
+            
+            // Check if canvas resolution needs update
+            if (canvas.width !== displayWidth || canvas.height !== displayHeight) {
+                canvas.width = displayWidth;
+                canvas.height = displayHeight;
+                // Reset positions based on new size
+                playerY = canvas.height/2 - PADDLE_HEIGHT/2;
+                cpuY = canvas.height/2 - PADDLE_HEIGHT/2;
+            }
+        }
 
         function openPongGame() {
             document.getElementById('pong-modal').classList.add('open');
-            playerScore = 0; cpuScore = 0; showingWinScreen = false;
+            resizeCanvas();
+            
+            playerScore = 0; 
+            cpuScore = 0; 
+            showingWinScreen = false;
             
             // Initial Draw
             drawEverything();
             
-            // "Ready... Go!" Sequence
+            // Sequence
             showTextOverlay("Ready...");
             setTimeout(() => {
                 showTextOverlay("Go!");
                 setTimeout(() => {
-                    ballReset();
-                    if (!gameInterval) {
-                        gameInterval = setInterval(() => { moveEverything(); drawEverything(); }, 1000 / 60);
+                    startBall();
+                    if (!isGameRunning) {
+                        isGameRunning = true;
+                        gameLoop();
                     }
                 }, 800);
             }, 1000);
+        }
+
+        function closePongGame(event) {
+            if (event.target.id === 'pong-modal') {
+                document.getElementById('pong-modal').classList.remove('open');
+                isGameRunning = false;
+                cancelAnimationFrame(animationFrameId);
+            }
         }
 
         function showTextOverlay(text) {
@@ -878,15 +922,18 @@
             ctx.fillText(text, canvas.width / 2, canvas.height / 2);
         }
 
-        function closePongGame(event) {
-            if (event.target.id === 'pong-modal') {
-                document.getElementById('pong-modal').classList.remove('open');
-                clearInterval(gameInterval);
-                gameInterval = null;
-            }
+        function startBall() {
+            ballX = canvas.width / 2;
+            ballY = canvas.height / 2;
+            let dir = Math.random() > 0.5 ? 1 : -1;
+            
+            // Use baseSpeed
+            ballSpeedX = baseSpeed * dir; 
+            // Random Y angle
+            ballSpeedY = (Math.random() * baseSpeed) - (baseSpeed / 2); 
         }
 
-        // Keyboard Event Listeners
+        // --- INPUT HANDLING (KEYBOARD & TOUCH) ---
         window.addEventListener('keydown', (e) => {
             if (e.key === 'w' || e.key === 'W') keys.w = true;
             if (e.key === 's' || e.key === 'S') keys.s = true;
@@ -901,71 +948,79 @@
             if (e.key === 'ArrowDown') keys.down = false;
         });
 
-        // Click to restart after win
-        canvas.addEventListener('mousedown', handleInputClick);
-        canvas.addEventListener('touchstart', handleInputClick);
+        // Touch logic for mobile (Drag to move)
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault(); // Stop scrolling
+            let rect = canvas.getBoundingClientRect();
+            // Get Y position relative to canvas
+            let touch = e.changedTouches[0];
+            let mouseY = touch.clientY - rect.top;
+            
+            // Center paddle on finger
+            playerY = mouseY - (PADDLE_HEIGHT / 2);
+        }, { passive: false });
 
-        function handleInputClick() {
+        canvas.addEventListener('mousedown', handleMouseClick);
+        canvas.addEventListener('touchstart', handleMouseClick);
+
+        function handleMouseClick(e) {
             if (showingWinScreen) {
                 playerScore = 0;
                 cpuScore = 0;
                 showingWinScreen = false;
-                ballReset();
+                startBall();
             }
         }
 
-        function ballReset() {
-            if (playerScore >= WINNING_SCORE || cpuScore >= WINNING_SCORE) {
-                showingWinScreen = true;
-            }
-            ballSpeedX = -ballSpeedX;
-            ballX = canvas.width / 2;
-            ballY = canvas.height / 2;
-            ballSpeedY = (Math.random() * 4) - 2; 
-        }
-
-        function computerMovement() {
-            let paddleCenter = cpuY + (PADDLE_HEIGHT / 2);
-            // Slower CPU reaction
-            if (paddleCenter < ballY - 35) {
-                cpuY += 5;
-            } else if (paddleCenter > ballY + 35) {
-                cpuY -= 5;
-            }
+        // --- MAIN LOOP ---
+        function gameLoop() {
+            if (!isGameRunning) return;
+            moveEverything();
+            drawEverything();
+            animationFrameId = requestAnimationFrame(gameLoop);
         }
 
         function moveEverything() {
             if (showingWinScreen) return;
-            
-            // Player Movement (Keyboard Only)
-            if (keys.w || keys.up) {
-                playerY -= paddleSpeed;
-            }
-            if (keys.s || keys.down) {
-                playerY += paddleSpeed;
-            }
-            
-            // Constrain paddle
+
+            // Define speeds based on baseSpeed
+            let moveSpeed = baseSpeed + 4; // Players move faster than ball
+            let aiSpeed = baseSpeed + 1;
+
+            // KEYBOARD MOVEMENT
+            if (keys.w || keys.up) playerY -= moveSpeed;
+            if (keys.s || keys.down) playerY += moveSpeed;
+
+            // Clamp Player
             if (playerY < 0) playerY = 0;
             if (playerY > canvas.height - PADDLE_HEIGHT) playerY = canvas.height - PADDLE_HEIGHT;
 
-            computerMovement();
+            // AI MOVEMENT
+            let paddleCenter = cpuY + (PADDLE_HEIGHT / 2);
+            if (paddleCenter < ballY - 35) {
+                cpuY += aiSpeed;
+            } else if (paddleCenter > ballY + 35) {
+                cpuY -= aiSpeed;
+            }
+            if (cpuY < 0) cpuY = 0;
+            if (cpuY > canvas.height - PADDLE_HEIGHT) cpuY = canvas.height - PADDLE_HEIGHT;
 
+            // BALL MOVEMENT
             ballX += ballSpeedX;
             ballY += ballSpeedY;
 
-            // Collision
-            if (ballX < 0 + PADDLE_WIDTH + BALL_RADIUS) {
+            // Horizontal Collisions
+            if (ballX < PADDLE_WIDTH + BALL_RADIUS) {
                 if (ballY > playerY && ballY < playerY + PADDLE_HEIGHT) {
                     ballSpeedX = -ballSpeedX;
                     let deltaY = ballY - (playerY + PADDLE_HEIGHT / 2);
-                    ballSpeedY = deltaY * 0.25; 
+                    ballSpeedY = deltaY * 0.35;
                     
-                    // Slower speed increment
-                    if (Math.abs(ballSpeedX) < 12) ballSpeedX *= 1.02;
+                    // Slight speed up
+                    if (Math.abs(ballSpeedX) < 15) ballSpeedX *= 1.05;
                 } else if (ballX < 0) {
                     cpuScore++;
-                    ballReset();
+                    resetBall();
                 }
             }
             
@@ -973,72 +1028,78 @@
                 if (ballY > cpuY && ballY < cpuY + PADDLE_HEIGHT) {
                     ballSpeedX = -ballSpeedX;
                     let deltaY = ballY - (cpuY + PADDLE_HEIGHT / 2);
-                    ballSpeedY = deltaY * 0.25;
-                    if (Math.abs(ballSpeedX) < 12) ballSpeedX *= 1.02;
+                    ballSpeedY = deltaY * 0.35;
                 } else if (ballX > canvas.width) {
                     playerScore++;
-                    ballReset();
+                    resetBall();
                 }
             }
 
-            if (ballY < 0 + BALL_RADIUS || ballY > canvas.height - BALL_RADIUS) {
+            // Vertical Collisions
+            if (ballY < BALL_RADIUS || ballY > canvas.height - BALL_RADIUS) {
                 ballSpeedY = -ballSpeedY;
             }
         }
 
+        function resetBall() {
+            if (playerScore >= WINNING_SCORE || cpuScore >= WINNING_SCORE) {
+                showingWinScreen = true;
+            } else {
+                startBall();
+            }
+        }
+
         function drawEverything() {
-            const COLOR_PLAYER = '#00f2ff';
-            const COLOR_CPU = '#ff0055';
-            
-            // Clear BG
-            colorRect(0, 0, canvas.width, canvas.height, '#1a1a1a');
+            // BG
+            ctx.fillStyle = '#1a1a1a';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             if (showingWinScreen) {
                 ctx.fillStyle = 'white';
-                ctx.font = '40px Orbitron';
+                ctx.font = '30px Orbitron';
                 ctx.textAlign = "center";
+                
                 if (playerScore >= WINNING_SCORE) {
-                    ctx.fillStyle = COLOR_PLAYER;
-                    ctx.fillText("YOU WON", canvas.width / 2, 200);
+                    ctx.fillStyle = '#00f2ff';
+                    ctx.fillText("YOU WON!", canvas.width / 2, canvas.height/2 - 40);
                 } else {
-                    ctx.fillStyle = COLOR_CPU;
-                    ctx.fillText("CPU WINS", canvas.width / 2, 200);
+                    ctx.fillStyle = '#ff0055';
+                    ctx.fillText("CPU WINS", canvas.width / 2, canvas.height/2 - 40);
                 }
-                ctx.fillStyle = '#666';
-                ctx.font = '20px Orbitron';
-                ctx.fillText("Click to Continue", canvas.width / 2, 500);
+                
+                ctx.fillStyle = '#999';
+                ctx.font = '16px Orbitron';
+                ctx.fillText("Tap to Play Again", canvas.width / 2, canvas.height/2 + 20);
+                
+                document.getElementById('playerScore').innerText = playerScore;
+                document.getElementById('cpuScore').innerText = cpuScore;
                 return;
             }
 
             // Net
+            ctx.fillStyle = '#333';
             for (let i = 0; i < canvas.height; i += 40) {
-                colorRect(canvas.width / 2 - 1, i, 2, 20, '#333');
+                ctx.fillRect(canvas.width / 2 - 1, i, 2, 20);
             }
 
-            // Paddles
-            colorRect(0, playerY, PADDLE_WIDTH, PADDLE_HEIGHT, COLOR_PLAYER);
-            colorRect(canvas.width - PADDLE_WIDTH, cpuY, PADDLE_WIDTH, PADDLE_HEIGHT, COLOR_CPU);
+            // Player
+            ctx.fillStyle = '#00f2ff';
+            ctx.fillRect(0, playerY, PADDLE_WIDTH, PADDLE_HEIGHT);
+
+            // CPU
+            ctx.fillStyle = '#ff0055';
+            ctx.fillRect(canvas.width - PADDLE_WIDTH, cpuY, PADDLE_WIDTH, PADDLE_HEIGHT);
 
             // Ball
-            colorCircle(ballX, ballY, BALL_RADIUS, '#ffffff');
-
+            ctx.fillStyle = 'white';
+            ctx.beginPath();
+            ctx.arc(ballX, ballY, BALL_RADIUS, 0, Math.PI * 2, true);
+            ctx.fill();
+            
             // Scores
             document.getElementById('playerScore').innerText = playerScore;
             document.getElementById('cpuScore').innerText = cpuScore;
         }
-
-        function colorRect(leftX, topY, width, height, drawColor) {
-            ctx.fillStyle = drawColor;
-            ctx.fillRect(leftX, topY, width, height);
-        }
-
-        function colorCircle(centerX, centerY, radius, drawColor) {
-            ctx.fillStyle = drawColor;
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, radius, 0, Math.PI * 2, true);
-            ctx.fill();
-        }
     </script>
-
 </body>
 </html>
