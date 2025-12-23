@@ -13,7 +13,7 @@
     <link rel="icon" href="favicon.ico" type="image/x-icon"/>
 
     <style>
-        /* --- RESET & VARIABLES --- */
+        /*RESETS*/
         * {
             margin: 0;
             padding: 0;
@@ -22,7 +22,7 @@
         }
 
         :root {
-            /* DEFAULT THEME (Teal/Original) */
+            /* DEFAULT */
             --bg-color: #2f5056;
             --header-bg: #1b2c2f;
             --card-bg: #264348;
@@ -36,7 +36,7 @@
             --transition-speed: 0.5s;
         }
 
-        /* --- COLOR THEMES --- */
+        /*COLORS*/
         body.theme-red {
             --bg-color: #562f2f;
             --header-bg: #2f1b1b;
@@ -75,7 +75,7 @@
             transition: background var(--transition-speed), color var(--transition-speed);
         }
 
-        /* --- GLOBAL STYLES --- */
+        /*GLOBAL STUFF*/
         a { text-decoration: none; color: inherit; transition: .3s; }
         ul { list-style: none; }
         
@@ -95,7 +95,7 @@
         h1 { font-size: 48px; font-weight: 700; margin-bottom: 10px; }
         h2 { font-size: 32px; font-weight: 600; margin-bottom: 25px; color: var(--accent-color); }
 
-        /* --- NAVIGATION --- */
+        /*NAV*/
         .header {
             position: fixed;
             top: 0; left: 0; width: 100%;
@@ -142,7 +142,7 @@
         .navbar a:hover, .navbar a.active { color: var(--hover-color); }
         .menu-icon { display: none; font-size: 28px; color: var(--text-color); cursor: pointer; }
 
-        /* --- SECTIONS --- */
+        /*SECTIONS*/
         section { padding: 100px 8% 60px; }
 
         .home {
@@ -167,7 +167,7 @@
             color: var(--header-bg); background: var(--hover-color); transform: translateY(-3px); 
         }
 
-        /* --- THEME SWITCHER --- */
+        /*theme switcher*/
         .theme-wrapper {
             position: relative;
             display: flex;
@@ -176,7 +176,7 @@
 
         .theme-trigger { z-index: 2; }
 
-        /* Tooltip style */
+        /*tooltops*/
         .theme-trigger::after, .social-icons a::after {
             content: attr(data-tooltip);
             position: absolute;
@@ -231,11 +231,11 @@
         .theme-btn.purple { background: #9d2cd1; }
         .theme-btn.pink { background: #d12c8e; }
 
-        /* --- PONG GAME MODAL --- */
+        /*pong*/
         .pong-modal {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            /* Lighter background so website is visible */
+            
             background: rgba(0, 0, 0, 0.4); 
             z-index: 2000;
             display: flex;
@@ -301,7 +301,7 @@
             font-family: 'Orbitron', sans-serif;
         }
 
-        /* --- ABOUT & SKILLS --- */
+        /*ABOUT*/
         .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; margin-top: 20px; }
         .info-box h3 { font-size: 22px; margin-bottom: 15px; color: #fff; }
         .skills-container { display: flex; flex-wrap: wrap; gap: 10px; }
@@ -313,7 +313,7 @@
             transition: 0.3s;
         }
 
-        /* --- EXPERIENCE --- */
+        /*EXP*/
         .exp-card {
             background: var(--card-bg); padding: 30px; border-radius: 12px;
             border-left: 4px solid var(--accent-color); margin-bottom: 30px;
@@ -343,7 +343,7 @@
         .exp-list { margin-left: 20px; list-style-type: disc; margin-top: 10px; }
         .exp-list li { margin-bottom: 8px; }
 
-        /* --- PROJECTS REDESIGN --- */
+        /*PROJECTS*/
         .project-row { display: flex; align-items: center; gap: 50px; margin-bottom: 100px; }
         .project-row:nth-child(even) { flex-direction: row-reverse; }
         .project-info { flex: 1; }
@@ -384,7 +384,7 @@
             box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
         }
 
-        /* --- CAROUSEL STYLES --- */
+        
         .carousel-container {
             width: 100%;
             position: relative;
@@ -430,7 +430,7 @@
         .prev-btn { left: -20px; }
         .next-btn { right: -20px; }
 
-        /* --- RESUME --- */
+        /*RES*/
         .resume-container { text-align: center; max-width: 900px; margin: 0 auto; }
         .download-btn {
             display: inline-flex; align-items: center; gap: 10px;
@@ -445,7 +445,7 @@
             margin: 30px auto;
             width: 100%;
             max-width: 800px;
-            /* Aspect Ratio Fix for Mobile */
+            
             aspect-ratio: 8.5 / 11; 
             height: auto;
             position: relative;
@@ -466,7 +466,7 @@
             box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
         }
 
-        /* --- FOOTER EASTER EGG --- */
+        /*easter egg*/
         .footer {
             text-align: center;
             padding: 30px 0;
@@ -490,7 +490,7 @@
             text-shadow: 0 0 10px var(--accent-color), 0 0 20px var(--hover-color), 0 0 40px var(--hover-color);
         }
 
-        /* --- RESPONSIVE --- */
+        /*smooth stuff time*/
         @media (max-width: 900px) {
             .about-grid, .project-row, .project-row:nth-child(even) {
                 grid-template-columns: 1fr; flex-direction: column; gap: 30px;
@@ -509,7 +509,7 @@
             .menu-icon { display: block; }
             h1 { font-size: 36px; } h2 { font-size: 28px; }
             
-            /* Responsive Scoreboard for Pong */
+            /*real smooth init*/
             .score-board { font-size: 2rem; }
             .score { margin: 0 30px; }
         }
@@ -759,13 +759,10 @@
     </footer>
 
     <script>
-        // --- THIS IS THE SPEED VARIABLE ---
-        // Change this number to make the game faster or slower.
-        // 4 is normal/slow. 8 is fast.
+        //speed var
         let baseSpeed = 4;
-        // ----------------------------------
 
-        // --- 1. MENU & ANIMATIONS ---
+
         let menuIcon = document.querySelector('#menu-icon');
         let navbar = document.querySelector('.navbar');
 
@@ -792,7 +789,6 @@
             }
         });
 
-        // --- CAROUSEL LOGIC ---
         function moveSlide(carouselId, direction) {
             const container = document.getElementById(carouselId);
             const slides = container.getElementsByClassName('carousel-slide');
@@ -813,7 +809,6 @@
             slides[newIndex].classList.add('active');
         }
 
-        // --- THEME LOGIC ---
         function toggleThemeMenu() {
             const wrapper = document.getElementById('theme-wrapper');
             if (wrapper.classList.contains('active')) {
@@ -839,17 +834,17 @@
             }
         }
 
-        // --- 5. SMOOTH PONG GAME LOGIC (PC & MOBILE FIXED) ---
+        //game logic
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         
-        // Game Constants
+        //consts
         let WINNING_SCORE = 5;
         let PADDLE_HEIGHT = 100;
         let PADDLE_WIDTH = 10;
         let BALL_RADIUS = 8;
         
-        // Game State
+        //states
         let playerY = 250;
         let cpuY = 250;
         let ballX = 400;
@@ -862,20 +857,18 @@
         let isGameRunning = false;
         let animationFrameId;
 
-        // Input State
         let keys = { w: false, s: false, up: false, down: false };
 
-        // Resize Canvas for Retina/Mobile clarity
         function resizeCanvas() {
             let displayWidth = canvas.clientWidth;
-            // Limit height to maintain aspect roughly or fit screen
+
             let displayHeight = Math.min(600, window.innerHeight * 0.6); 
             
-            // Check if canvas resolution needs update
+
             if (canvas.width !== displayWidth || canvas.height !== displayHeight) {
                 canvas.width = displayWidth;
                 canvas.height = displayHeight;
-                // Reset positions based on new size
+
                 playerY = canvas.height/2 - PADDLE_HEIGHT/2;
                 cpuY = canvas.height/2 - PADDLE_HEIGHT/2;
             }
@@ -889,10 +882,9 @@
             cpuScore = 0; 
             showingWinScreen = false;
             
-            // Initial Draw
+
             drawEverything();
             
-            // Sequence
             showTextOverlay("Ready...");
             setTimeout(() => {
                 showTextOverlay("Go!");
@@ -933,7 +925,6 @@
             ballSpeedY = (Math.random() * baseSpeed) - (baseSpeed / 2); 
         }
 
-        // --- INPUT HANDLING (KEYBOARD & TOUCH) ---
         window.addEventListener('keydown', (e) => {
             if (e.key === 'w' || e.key === 'W') keys.w = true;
             if (e.key === 's' || e.key === 'S') keys.s = true;
@@ -948,15 +939,14 @@
             if (e.key === 'ArrowDown') keys.down = false;
         });
 
-        // Touch logic for mobile (Drag to move)
+        //mobile
         canvas.addEventListener('touchmove', (e) => {
             e.preventDefault(); // Stop scrolling
             let rect = canvas.getBoundingClientRect();
-            // Get Y position relative to canvas
             let touch = e.changedTouches[0];
             let mouseY = touch.clientY - rect.top;
             
-            // Center paddle on finger
+            // center paddle on finger
             playerY = mouseY - (PADDLE_HEIGHT / 2);
         }, { passive: false });
 
@@ -972,7 +962,7 @@
             }
         }
 
-        // --- MAIN LOOP ---
+        //main loop for game
         function gameLoop() {
             if (!isGameRunning) return;
             moveEverything();
@@ -987,15 +977,15 @@
             let moveSpeed = baseSpeed + 4; // Players move faster than ball
             let aiSpeed = baseSpeed + 1;
 
-            // KEYBOARD MOVEMENT
+            
             if (keys.w || keys.up) playerY -= moveSpeed;
             if (keys.s || keys.down) playerY += moveSpeed;
 
-            // Clamp Player
+            //fix player movement
             if (playerY < 0) playerY = 0;
             if (playerY > canvas.height - PADDLE_HEIGHT) playerY = canvas.height - PADDLE_HEIGHT;
 
-            // AI MOVEMENT
+            //cpu movement
             let paddleCenter = cpuY + (PADDLE_HEIGHT / 2);
             if (paddleCenter < ballY - 35) {
                 cpuY += aiSpeed;
@@ -1005,18 +995,18 @@
             if (cpuY < 0) cpuY = 0;
             if (cpuY > canvas.height - PADDLE_HEIGHT) cpuY = canvas.height - PADDLE_HEIGHT;
 
-            // BALL MOVEMENT
+            //balls
             ballX += ballSpeedX;
             ballY += ballSpeedY;
 
-            // Horizontal Collisions
+            
             if (ballX < PADDLE_WIDTH + BALL_RADIUS) {
                 if (ballY > playerY && ballY < playerY + PADDLE_HEIGHT) {
                     ballSpeedX = -ballSpeedX;
                     let deltaY = ballY - (playerY + PADDLE_HEIGHT / 2);
                     ballSpeedY = deltaY * 0.15;
                     
-                    // Slight speed up
+                    //advance
                     if (Math.abs(ballSpeedX) < 15) ballSpeedX *= 1.05;
                 } else if (ballX < 0) {
                     cpuScore++;
@@ -1035,7 +1025,7 @@
                 }
             }
 
-            // Vertical Collisions
+        
             if (ballY < BALL_RADIUS || ballY > canvas.height - BALL_RADIUS) {
                 ballSpeedY = -ballSpeedY;
             }
@@ -1050,7 +1040,7 @@
         }
 
         function drawEverything() {
-            // BG
+            
             ctx.fillStyle = '#1a1a1a';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -1076,13 +1066,13 @@
                 return;
             }
 
-            // Net
+            
             ctx.fillStyle = '#333';
             for (let i = 0; i < canvas.height; i += 40) {
                 ctx.fillRect(canvas.width / 2 - 1, i, 2, 20);
             }
 
-            // Player
+            //for player
             ctx.fillStyle = '#00f2ff';
             ctx.fillRect(0, playerY, PADDLE_WIDTH, PADDLE_HEIGHT);
 
